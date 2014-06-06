@@ -6,8 +6,8 @@ from pyglet.window import key
 from pyglet.sprite import Sprite
 
 # Global constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+WIDTH= 800
+HEIGHT = 600
 
 # Global varibles
 score = 0
@@ -18,6 +18,9 @@ window = pyglet.window.Window(800, 600)
 
 # Images
 background = pyglet.image.load('static/images/nebula_blue.s2014.png')
+rock_img = pyglet.image.load('static/images/asteroid_blue.png')
+rock_img.anchor_x = rock_img.height/2
+rock_img.anchor_y = rock_img.width/2
 ship_sequence = pyglet.image.load('static/images/double_ship.png')
 ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
 
@@ -26,9 +29,53 @@ ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
 ###############################################################################o
 # TODO                                                                         #
 # We need two Sprite subclasses Moving_Sprite and Player_Sprite                #
-# Moving_Sprite should interit from Sprite and PLayer_Sprite should inherit    #
+# Moving_Sprite should interit from Sprite and Player_Sprite should inherit    #
 # Moving_Sprite                                                                #
 ################################################################################
+class Moving_Sprite(Sprite):
+    def __init__(self, img, 
+                 x=None, 
+                 y=None, 
+                 x_vel=None, 
+                 y_vel=None, 
+                 angle=None,
+                 angle_vel = None,
+                 sound = None):
+        if x == None:
+            x = random.randrange(0, WIDTH)
+        if y == None:
+            y = random.randrange(0, HEIGHT)
+        super(Moving_Sprite, self).__init__(img, x, y)
+
+        if x_vel == None:
+            x_vel = random.randrange(0, difficulty)/50.0 - difficulty/2.0/50.0
+        self.x_vel = x_vel
+
+        if y_vel == None:
+            y_vel = random.randrange(0, difficulty)/50.0 - difficulty/2.0/50.0
+        self.y_vel = y_vel
+
+        if angle == None:
+            angle = random.randrange(0, 360)
+        self.rotation = angle
+
+        if angle_vel == None:
+            angle_vel = (random.randrange(0, 60) - 30) * .2
+        self.angle_vel = angle_vel
+
+        self.image = img
+        self.age = 0
+        # TODO Handle sound
+
+    def update(self):
+        self.rotation += self.angle_vel
+        self.x += self.x_vel
+        self.x = self.x % WIDTH
+        self.y += self.y_vel
+        self.y = self.y % HEIGHT
+        # TODO add lifespan logic
+        return True
+
 class Ship(Sprite):
     def __init__(self, img, x=0, y=0, x_vel=0, y_vel=0, angle=0):
         super(Ship, self).__init__(img, x, y)
@@ -60,6 +107,7 @@ class Ship(Sprite):
             self.img = ship_imgs[0]
 
 ship = Ship(ship_imgs[0], 50, 100)
+rock = Moving_Sprite(rock_img)
 
 @window.event
 def on_key_press(symbol, modifiers):
@@ -75,6 +123,8 @@ def on_draw():
     window.clear()
     background.blit(0, 0)
     ship.draw()
+    rock.draw()
+    rock.update()
 
 pyglet.app.run()
 
