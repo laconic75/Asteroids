@@ -14,7 +14,8 @@ score = 0
 difficulty = score + 50
 lives = 3
 time = 0.5
-window = pyglet.window.Window(800, 600)
+window = pyglet.window.Window(WIDTH, HEIGHT)
+batch = pyglet.graphics.Batch()
 
 # Images
 background = pyglet.image.load('static/images/nebula_blue.s2014.png')
@@ -32,7 +33,7 @@ ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
 # Moving_Sprite should interit from Sprite and Player_Sprite should inherit    #
 # Moving_Sprite                                                                #
 ################################################################################
-class Moving_Sprite(Sprite):
+class MovingSprite(Sprite):
     def __init__(self, img, 
                  x=None, 
                  y=None, 
@@ -40,12 +41,13 @@ class Moving_Sprite(Sprite):
                  y_vel=None, 
                  angle=None,
                  angle_vel = None,
-                 sound = None):
+                 sound = None,
+                 batch = None):
         if x == None:
             x = random.randrange(0, WIDTH)
         if y == None:
             y = random.randrange(0, HEIGHT)
-        super(Moving_Sprite, self).__init__(img, x, y)
+        super(MovingSprite, self).__init__(img, x, y, batch = batch)
 
         if x_vel == None:
             x_vel = random.randrange(0, difficulty)/50.0 - difficulty/2.0/50.0
@@ -76,9 +78,9 @@ class Moving_Sprite(Sprite):
         # TODO add lifespan logic
         return True
 
-class Ship(Sprite):
-    def __init__(self, img, x=0, y=0, x_vel=0, y_vel=0, angle=0):
-        super(Ship, self).__init__(img, x, y)
+class PlayerSprite(MovingSprite):
+    def __init__(self, img, x=0, y=0, x_vel=0, y_vel=0, angle=0, batch = None):
+        super(PlayerSprite, self).__init__(img, x, y, batch = batch)
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.angle = angle
@@ -106,8 +108,11 @@ class Ship(Sprite):
         else:
             self.img = ship_imgs[0]
 
-ship = Ship(ship_imgs[0], 50, 100)
-rock = Moving_Sprite(rock_img)
+ship = PlayerSprite(ship_imgs[0], 50, 100, batch=batch)
+rock = MovingSprite(rock_img, batch=batch)
+def update(dt):
+    rock.update()
+pyglet.clock.schedule_interval(update, 1/60.0) # update at 60Hz
 
 @window.event
 def on_key_press(symbol, modifiers):
@@ -122,9 +127,7 @@ def on_key_press(symbol, modifiers):
 def on_draw():
     window.clear()
     background.blit(0, 0)
-    ship.draw()
-    rock.draw()
-    rock.update()
+    batch.draw()
 
 pyglet.app.run()
 
