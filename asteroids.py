@@ -127,8 +127,8 @@ class PlayerSprite(MovingSprite):
 
     def accel(self):
         if self._thrusters:
-            self.x_vel += math.cos(self.rotation/180*math.pi) * .1
-            self.y_vel += math.sin(self.rotation/180*math.pi) * .1
+            self.x_vel += math.cos(math.radians(self.rotation)) * .1
+            self.y_vel -= math.sin(math.radians(self.rotation)) * .1
             
     def friction(self):
             self.x_vel = self.x_vel * .99
