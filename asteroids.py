@@ -115,7 +115,7 @@ class PlayerSprite(MovingSprite):
             self.image = ship_imgs[1]
             # need to play thrusters sound
         else:
-            self.imgage = ship_imgs[0]
+            self.image = ship_imgs[0]
 
     @property
     def angle_vel(self):
@@ -154,10 +154,10 @@ def decel():
     ship.thrusters = False
 
 def left():
-    ship.angle_vel -= 10
+    ship.angle_vel -= 5
 
 def right():
-    ship.angle_vel += 10
+    ship.angle_vel += 5
     
 def fire():
     ship.shoot()
