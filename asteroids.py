@@ -17,7 +17,9 @@ difficulty = score + 50
 lives = 3
 time = 0.5
 window = pyglet.window.Window(WIDTH, HEIGHT)
-batch = pyglet.graphics.Batch()
+ships = pyglet.graphics.Batch()
+rocks = pyglet.graphics.Batch()
+missles = pyglet.graphics.Batch()
 
 # Images
 background = pyglet.image.load('static/images/nebula_blue.s2014.png')
@@ -30,8 +32,18 @@ ship_imgs[0].anchor_x = ship_imgs[0].height/2
 ship_imgs[0].anchor_y = ship_imgs[0].width/2
 ship_imgs[1].anchor_x = ship_imgs[1].height/2
 ship_imgs[1].anchor_y = ship_imgs[1].width/2
-
+missle_img = pyglet.image.load('static/images/shot2.png')
 # ship = Sprite(ship_imgs[0], 50, 100)
+
+# Helper functions
+
+def angle_to_vector(ang):
+    rad_ang = math.radians(ang)
+    return math.cos(rad_ang), -math.sin(rad_ang)
+
+def dist(p,q):
+    return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
+
 
 # #############################################################################
 # TODO                                                                        #
@@ -127,12 +139,22 @@ class PlayerSprite(MovingSprite):
 
     def accel(self):
         if self._thrusters:
-            self.x_vel += math.cos(math.radians(self.rotation)) * .1
-            self.y_vel -= math.sin(math.radians(self.rotation)) * .1
-            
+           x_vel, y_vel = tuple([vel * .1 for vel in angle_to_vector(self.rotation)]) 
+           self.x_vel += x_vel 
+           self.y_vel += y_vel
+    def shoot(self):
+        # Raw import from CodeSkulptor. Needs some work
+        forward_vector = angle_to_vector(self.rotation)
+        ship_nose = [self.x + ((self.height/2)* forward_vector[0]),
+                     self.y + ((self.height/2)* forward_vector[1])]
+        firing_vel = [self.x_vel + (5*forward_vector[0]), 
+                      self.y_vel + (5*forward_vector[1])]
+        shot = MovingSprite(missle_img, ship_nose[0], ship_nose[1], 
+                            firing_vel[0], firing_vel[0], batch= missles)
+
     def friction(self):
-            self.x_vel = self.x_vel * .99
-            self.y_vel = self.y_vel * .99
+            self.x_vel = self.x_vel * .995
+            self.y_vel = self.y_vel * .995
 
     def update(self):
         self.accel()
@@ -144,8 +166,8 @@ class PlayerSprite(MovingSprite):
         self.y = self.y % HEIGHT
 
 
-ship = PlayerSprite(ship_imgs[0], 50, 100, batch=batch)
-rock = MovingSprite(rock_img, batch=batch)
+ship = PlayerSprite(ship_imgs[0], 50, 100, batch=ships)
+rock = MovingSprite(rock_img, batch=rocks)
 
 def accel():
     ship.thrusters = True
@@ -186,7 +208,9 @@ def on_key_release(symbol, modifiers):
 def on_draw():
     window.clear()
     background.blit(0, 0)
-    batch.draw()
+    ships.draw()
+    rocks.draw()
+    missles.draw()
 
 def update(dt):
     rock.update()
