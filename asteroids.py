@@ -23,20 +23,24 @@ missles = pyglet.graphics.Batch()
 
 # Images
 background = pyglet.image.load('static/images/nebula_blue.s2014.png')
+
 rock_img = pyglet.image.load('static/images/asteroid_blue.png')
 rock_img.anchor_x = rock_img.height/2
 rock_img.anchor_y = rock_img.width/2
+
 ship_sequence = pyglet.image.load('static/images/double_ship.png')
 ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
 ship_imgs[0].anchor_x = ship_imgs[0].height/2
 ship_imgs[0].anchor_y = ship_imgs[0].width/2
 ship_imgs[1].anchor_x = ship_imgs[1].height/2
 ship_imgs[1].anchor_y = ship_imgs[1].width/2
+
 missle_img = pyglet.image.load('static/images/shot2.png')
-# ship = Sprite(ship_imgs[0], 50, 100)
+
+# Sounds
+missile_snd = pyglet.media.load('static/sounds/laser7.wav', streaming=False)
 
 # Helper functions
-
 def angle_to_vector(ang):
     rad_ang = math.radians(ang)
     return math.cos(rad_ang), -math.sin(rad_ang)
@@ -109,6 +113,7 @@ class PlayerSprite(MovingSprite):
         self._thrusters = False
         self._angle_vel = 0
 
+
     @property
     def position(self):
         """Return tuple of ships position"""
@@ -143,14 +148,19 @@ class PlayerSprite(MovingSprite):
            self.x_vel += x_vel 
            self.y_vel += y_vel
     def shoot(self):
-        # Raw import from CodeSkulptor. Needs some work
+        """
+        Shoot missle and make missle sound
+        """
         forward_vector = angle_to_vector(self.rotation)
         ship_nose = [self.x + ((self.height/2)* forward_vector[0]),
                      self.y + ((self.height/2)* forward_vector[1])]
         firing_vel = [self.x_vel + (5*forward_vector[0]), 
                       self.y_vel + (5*forward_vector[1])]
-        shot = MovingSprite(missle_img, ship_nose[0], ship_nose[1], 
-                            firing_vel[0], firing_vel[0], batch= missles)
+        missiles_fired.append(MovingSprite(missle_img, 
+                                           ship_nose[0], ship_nose[1], 
+                                           firing_vel[0], firing_vel[1], 
+                                           batch= missles))
+        missile_snd.play()
 
     def friction(self):
             self.x_vel = self.x_vel * .995
@@ -168,7 +178,7 @@ class PlayerSprite(MovingSprite):
 
 ship = PlayerSprite(ship_imgs[0], 50, 100, batch=ships)
 rock = MovingSprite(rock_img, batch=rocks)
-
+missiles_fired = []
 def accel():
     ship.thrusters = True
     
@@ -215,6 +225,8 @@ def on_draw():
 def update(dt):
     rock.update()
     ship.update()
+    for missile in missiles_fired:
+        missile.update()
 
 pyglet.clock.schedule_interval(update, 1/60.0)  # update at 60Hz
 pyglet.app.run()
