@@ -93,6 +93,7 @@ class MovingSprite(Sprite):
         self.image = img
         self.age = 0
         # TODO Handle sound
+        # TODO Explosion Animations
 
     def update(self):
         self.rotation += self._angle_vel
@@ -130,7 +131,7 @@ class PlayerSprite(MovingSprite):
         if self._thrusters:
             # Trusters on
             self.image = ship_imgs[1]
-            # need to play thrusters sound
+            # TODO need to play thrusters sound
         else:
             self.image = ship_imgs[0]
 
@@ -175,7 +176,7 @@ class PlayerSprite(MovingSprite):
         self.x = self.x % WIDTH
         self.y = self.y % HEIGHT
 
-
+# Global Varibles that need to be moved into a class. 
 ship = PlayerSprite(ship_imgs[0], 50, 100, batch=ships)
 rock = MovingSprite(rock_img, batch=rocks)
 missiles_fired = []
@@ -199,11 +200,6 @@ key_ups = {key.UP:decel,key.LEFT:right, key.RIGHT:left}
 
 @window.event
 def on_key_press(symbol, modifiers):
-    #if symbol == key.RIGHT:
-    #    ship.x += 50
-    #if symbol == key.LEFT:
-    #    ship.x -= 50
-    #if symbol == key.UP:
     for key in key_downs:
         if key == symbol:
             key_downs[symbol]()
@@ -213,6 +209,11 @@ def on_key_release(symbol, modifiers):
     for key in key_ups:
         if key == symbol:
             key_ups[symbol]()
+
+# TODO Implement Colisons
+# TODO Implement Sheilds
+# TODO Implement Spontaneos Rock Spawning
+# TODO Display Spash Screen
 
 @window.event
 def on_draw():
