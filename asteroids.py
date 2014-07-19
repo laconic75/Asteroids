@@ -39,6 +39,7 @@ missle_img = pyglet.image.load('static/images/shot2.png')
 
 # Sounds
 missile_snd = pyglet.media.load('static/sounds/laser7.wav', streaming=False)
+thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
 
 # Helper functions
 def angle_to_vector(ang):
@@ -47,8 +48,8 @@ def angle_to_vector(ang):
 
 def dist(p,q):
     return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
-
-
+def group_collide(sprite_group, other_object):
+    return False
 # #############################################################################
 # TODO                                                                        #
 # We need two Sprite subclasses Moving_Sprite and Player_Sprite               #
@@ -66,6 +67,8 @@ class MovingSprite(Sprite):
                  angle=None,
                  ang_vel=None,
                  sound=None,
+                 radius=0,
+                 lifespan=None,
                  batch=None):
         if x is None:
             x = random.randrange(0, WIDTH)
@@ -89,11 +92,24 @@ class MovingSprite(Sprite):
             ang_vel = (random.randrange(0, 60) - 30) * .2
         self._angle_vel = ang_vel
 
+        if lifespan is None:
+            lifespan = float('inf')
+        self._lifespan = lifespan
+
 
         self.image = img
         self.age = 0
+        self._radius = radius
         # TODO Handle sound
         # TODO Explosion Animations
+
+    @property
+    def radius(self):
+        return self._radius
+    
+    @property
+    def lifespan(self):
+        return self._lifespan
 
     def update(self):
         self.rotation += self._angle_vel
@@ -101,24 +117,41 @@ class MovingSprite(Sprite):
         self.x = self.x % WIDTH
         self.y += self.y_vel
         self.y = self.y % HEIGHT
-        # TODO add lifespan logic
+        # lifespan logic
+        self.age += 1
+        if self.age > self._lifespan:
+            return False
+        else:
+            return True
         return True
 
 
 class PlayerSprite(MovingSprite):
-    def __init__(self, img, x=0, y=0, x_vel=0, y_vel=0, angle=0, batch=None):
+    def __init__(self, 
+                 img, 
+                 x=0, 
+                 y=0, 
+                 x_vel=0, 
+                 y_vel=0, 
+                 angle=0, 
+                 radius=0, 
+                 batch=None):
+
         super(PlayerSprite, self).__init__(img, x, y, batch=batch)
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.rotation  = angle
         self._thrusters = False
         self._angle_vel = 0
+        self.thruster_snd = pyglet.media.Player()
+        self.thruster_snd.queue(thruster_snd)
 
 
     @property
     def position(self):
         """Return tuple of ships position"""
         return self.x, self.y
+
     @property
     def thrusters(self):
         """Thrusters on or off"""
@@ -131,9 +164,11 @@ class PlayerSprite(MovingSprite):
         if self._thrusters:
             # Trusters on
             self.image = ship_imgs[1]
-            # TODO need to play thrusters sound
+            # Play thrusters sound
+            self.thruster_snd.play()
         else:
             self.image = ship_imgs[0]
+            self.thruster_snd.pause()
 
     @property
     def angle_vel(self):
@@ -157,10 +192,10 @@ class PlayerSprite(MovingSprite):
                      self.y + ((self.height/2)* forward_vector[1])]
         firing_vel = [self.x_vel + (5*forward_vector[0]), 
                       self.y_vel + (5*forward_vector[1])]
-        missiles_fired.append(MovingSprite(missle_img, 
+        missiles_fired.add(MovingSprite(missle_img, 
                                            ship_nose[0], ship_nose[1], 
                                            firing_vel[0], firing_vel[1], 
-                                           batch= missles))
+                                           lifespan=60, batch= missles))
         missile_snd.play()
 
     def friction(self):
@@ -177,9 +212,9 @@ class PlayerSprite(MovingSprite):
         self.y = self.y % HEIGHT
 
 # Global Varibles that need to be moved into a class. 
-ship = PlayerSprite(ship_imgs[0], 50, 100, batch=ships)
-rock = MovingSprite(rock_img, batch=rocks)
-missiles_fired = []
+ship = PlayerSprite(ship_imgs[0], 50, 100, radius=35, batch=ships)
+rock = MovingSprite(rock_img, radius=40, batch=rocks)
+missiles_fired = set() 
 def accel():
     ship.thrusters = True
     
@@ -226,8 +261,11 @@ def on_draw():
 def update(dt):
     rock.update()
     ship.update()
-    for missile in missiles_fired:
-        missile.update()
+    local_missiles = set(missiles_fired)
+    for missile in local_missiles:
+        if not missile.update():
+            missiles_fired.remove(missile)
+            missile.delete()
 
 pyglet.clock.schedule_interval(update, 1/60.0)  # update at 60Hz
 pyglet.app.run()
