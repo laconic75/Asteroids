@@ -3,6 +3,7 @@ import math
 import random
 import pyglet
 from utils import angle_to_vector
+from utils import dist
 from pyglet.sprite import Sprite
 
 # #############################################################################
@@ -64,6 +65,14 @@ class MovingSprite(Sprite):
     def lifespan(self):
         return self._lifespan
 
+    def collide(self, other_object):
+        sum_radii = self.radius + other_object.radius
+        other_pos = (other_object.x, other_object.y)
+        if dist((self.x,self.y), other_pos) < sum_radii:
+            return True
+        else: 
+            return False
+        
     def update(self, width, height):
         self.rotation += self._angle_vel
         self.x += self.x_vel

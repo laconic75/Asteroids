@@ -21,6 +21,7 @@ class Window(pyglet.window.Window):
         self.ships = pyglet.graphics.Batch()
         self.rocks = pyglet.graphics.Batch()
         self.missiles = pyglet.graphics.Batch()
+        self.started = False
 
         # Images
         self.background = pyglet.image.load('static/images/nebula_blue.s2014.png')
@@ -36,18 +37,31 @@ class Window(pyglet.window.Window):
         thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
         explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
 
+        # Sprinte Groups
+        self.rock_group = set()
+        self.missile_group = set()
+
         # Spites 
         self.ship = PlayerSprite(ship_imgs, thruster_snd, 50, 100, 0, 0, 0, 35, self.ships, self.missiles)
         # Temporary 
         rock_position = utils.random_position(WIDTH, HEIGHT)
         # Temporary
         self.rock = MovingSprite(rock_img, sound=explosion_snd, diff=self.difficulty, radius=40, batch=self.rocks)
+        self.rock_group.add(self.rock)
 
         # Keymaps
         self.key_downs = {key.UP:self.accel, key.LEFT:self.left, key.RIGHT:self.right, key.SPACE:self.fire}
         self.key_ups = {key.UP:self.decel, key.LEFT:self.right, key.RIGHT:self.left}
 
         pyglet.clock.schedule_interval(self.update, 1/60.0)  # update at 60Hz
+    def game_over():
+        self.started = False
+        rock_group = set()
+        # sountrack.pause()
+        self.lives = 3
+        self.score = 0
+        # intro screen 
+
 
     def accel(self):
         self.ship.thrusters = True
@@ -86,13 +100,18 @@ class Window(pyglet.window.Window):
         self.missiles.draw()
 
     def update(self, dt):
-        self.rock.update(WIDTH, HEIGHT) 
+        for rock in self.rock_group:
+            rock.update(WIDTH, HEIGHT) 
         self.ship.update(WIDTH, HEIGHT) 
+
         self.local_missiles = set(self.ship.missiles_fired)
         for missile in self.local_missiles:
             if not missile.update(WIDTH, HEIGHT):
                 self.ship.missiles_fired.remove(missile)
                 missile.delete()
+
+        if group_collide(self.rock_group, self.ship):
+                    self.lives -= 1
 
 
 

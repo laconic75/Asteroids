@@ -13,6 +13,12 @@ def dist(p,q):
     return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
 
 def group_collide(sprite_group, other_object):
+    sprites = set(sprite_group)
+    for sprite in sprites:
+        if sprite.collide(other_object):
+            sprite_group.remove(sprite)
+            sprite.delete()
+            return True
     return False
 
 def random_position(width, height):
