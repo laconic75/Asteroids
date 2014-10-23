@@ -6,13 +6,23 @@ import math
 
 # Helper functions
 def angle_to_vector(ang):
+    """
+    Input: angle
+    Output: Cooridante that coresponds to angle
+    """
     rad_ang = math.radians(ang)
     return math.cos(rad_ang), -math.sin(rad_ang)
 
 def dist(p,q):
+    """
+    returns distance between points
+    """
     return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
 
 def group_collide(sprite_group, other_object):
+    """
+    Check if a sprite collides with a sprite in a group of sprites
+    """
     sprites = set(sprite_group)
     for sprite in sprites:
         if sprite.collide(other_object):
@@ -21,7 +31,22 @@ def group_collide(sprite_group, other_object):
             return True
     return False
 
+def group_group_colide(sprite_group, o_sprite_group):
+    """
+    Check is sprites in two groups collide
+    """
+    sprites = set(sprite_group)
+    for sprite in sprites:
+        if group_collide(o_sprite_group, sprite):
+            sprite_group.remove(sprite)
+            sprite.delete()
+            return True
+        return False
+
 def random_position(width, height):
+    """
+    Generate random set of coordinates
+    """
     x = random.randrange(0, width)
     y = random.randrange(0, height)
     return x,y

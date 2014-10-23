@@ -2,7 +2,7 @@
 import pyglet
 import utils
 from pyglet.window import key
-from utils import group_collide
+from utils import group_collide, group_group_colide
 from sprites import MovingSprite, PlayerSprite
 # Global constants
 WIDTH = 800
@@ -22,12 +22,13 @@ class Window(pyglet.window.Window):
         self.rocks = pyglet.graphics.Batch()
         self.missiles = pyglet.graphics.Batch()
         self.started = False
+        self.rock_trigger = 0
 
         # Images
         self.background = pyglet.image.load('static/images/nebula_blue.s2014.png')
 
-        rock_img = pyglet.image.load('static/images/asteroid_blue.png')
-        utils.center_image_anchor(rock_img)
+        self.rock_img = pyglet.image.load('static/images/asteroid_blue.png')
+        utils.center_image_anchor(self.rock_img)
 
         ship_sequence = pyglet.image.load('static/images/double_ship.png')
         ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
@@ -35,26 +36,30 @@ class Window(pyglet.window.Window):
 
         # Sounds
         thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
-        explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
+        self.explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
 
-        # Sprinte Groups
+        # Sprite Groups
         self.rock_group = set()
         self.missile_group = set()
 
         # Spites 
-        self.ship = PlayerSprite(ship_imgs, thruster_snd, 50, 100, 0, 0, 0, 35, self.ships, self.missiles)
-        # Temporary 
-        rock_position = utils.random_position(WIDTH, HEIGHT)
-        # Temporary
-        self.rock = MovingSprite(rock_img, sound=explosion_snd, diff=self.difficulty, radius=40, batch=self.rocks)
-        self.rock_group.add(self.rock)
+        self.ship = PlayerSprite(ship_imgs, thruster_snd, 50, 100, 0, 0, 0, 35,
+                                 self.ships, self.missiles)
+
+        # Screen Text
+        self.text_lives = pyglet.text.Label('Lives=' + str(self.lives),
+                                            font_name='Times New Roman',
+                                            font_size=36, x=10, y=10)
 
         # Keymaps
-        self.key_downs = {key.UP:self.accel, key.LEFT:self.left, key.RIGHT:self.right, key.SPACE:self.fire}
-        self.key_ups = {key.UP:self.decel, key.LEFT:self.right, key.RIGHT:self.left}
+        self.key_downs = {key.UP:self.accel, key.LEFT:self.left, 
+                          key.RIGHT:self.right, key.SPACE:self.fire}
+        self.key_ups = {key.UP:self.decel, key.LEFT:self.right, 
+                        key.RIGHT:self.left}
 
         pyglet.clock.schedule_interval(self.update, 1/60.0)  # update at 60Hz
-    def game_over():
+
+    def game_over(self):
         self.started = False
         rock_group = set()
         # sountrack.pause()
@@ -62,6 +67,10 @@ class Window(pyglet.window.Window):
         self.score = 0
         # intro screen 
 
+    def display_score(self):
+        self.text_lives = pyglet.text.Label('Lives=' + str(self.lives), 
+                                            font_name='Times New Roman',
+                                            font_size=36,                                                                                                       x=10, y=10)
 
     def accel(self):
         self.ship.thrusters = True
@@ -88,9 +97,21 @@ class Window(pyglet.window.Window):
             if key == symbol:
                 self.key_ups[symbol]()
 
+    def put_rock(self):
+        rock_position = utils.random_position(WIDTH, HEIGHT)
+        rock = MovingSprite (self.rock_img, rock_position[0], rock_position[1], 
+                             sound=self.explosion_snd, diff=self.difficulty, 
+                             radius=40, batch=self.rocks)
+        self.rock_group.add(rock)
+
+    def trigger_put_rock(self):
+        self.rock_trigger += 1
+        if self.rock_trigger > 60 and len(self.rock_group) < 10:
+            self.put_rock()
+            self.rock_trigger = 0
+            
     # TODO Implement Colisons
     # TODO Implement Sheilds
-    # TODO Implement Spontaneos Rock Spawning
     # TODO Display Spash Screen
     def on_draw(self):
         self.clear()
@@ -98,14 +119,16 @@ class Window(pyglet.window.Window):
         self.ships.draw()
         self.rocks.draw()
         self.missiles.draw()
+        self.text_lives.draw()
 
     def update(self, dt):
+        self.trigger_put_rock()
         for rock in self.rock_group:
             rock.update(WIDTH, HEIGHT) 
         self.ship.update(WIDTH, HEIGHT) 
 
-        self.local_missiles = set(self.ship.missiles_fired)
-        for missile in self.local_missiles:
+        local_missiles = set(self.ship.missiles_fired)
+        for missile in local_missiles:
             if not missile.update(WIDTH, HEIGHT):
                 self.ship.missiles_fired.remove(missile)
                 missile.delete()
@@ -113,6 +136,11 @@ class Window(pyglet.window.Window):
         if group_collide(self.rock_group, self.ship):
                     self.lives -= 1
 
+        if group_group_colide(self.rock_group, local_missiles):
+            self.score += 10
+            self.diff = self.score + 50
+
+        self.display_score()
 
 
 

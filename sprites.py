@@ -169,7 +169,8 @@ class PlayerSprite(MovingSprite):
         self._missiles_fired.add(MovingSprite(self.missile_img, 
                                            ship_nose[0], ship_nose[1], 
                                            firing_vel[0], firing_vel[1], 
-                                           lifespan=60, batch= self.missile_batch))
+                                           lifespan=60, radius = 5, 
+                                           batch= self.missile_batch))
         self.missile_snd.play()
 
     def friction(self):
