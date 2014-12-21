@@ -42,11 +42,12 @@ class Window(pyglet.window.Window):
         self.missile_group = set()
 
         # Spites 
-        self.ship = PlayerSprite(ship_imgs, thruster_snd, 50, 100, 0, 0, 0, 35, self.ships, self.missiles)
+        self.ship = PlayerSprite(ship_imgs, thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
         # Temporary 
         rock_position = utils.random_position(WIDTH, HEIGHT)
         # Temporary
         self.rock = MovingSprite(rock_img, sound=explosion_snd, diff=self.difficulty, radius=40, batch=self.rocks)
+        # self.rock = MovingSprite(rock_img, 400, 300, 0, 0, 0, batch=self.rocks, radius=40)
         self.rock_group.add(self.rock)
 
         # Keymaps

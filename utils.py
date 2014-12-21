@@ -10,7 +10,7 @@ def angle_to_vector(ang):
     return math.cos(rad_ang), -math.sin(rad_ang)
 
 def dist(p,q):
-    return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
+    return math.sqrt(((p[0] - q[0]) ** 2)+((p[1] - q[1]) ** 2))
 
 def group_collide(sprite_group, other_object):
     sprites = set(sprite_group)

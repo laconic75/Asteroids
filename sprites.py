@@ -65,10 +65,16 @@ class MovingSprite(Sprite):
     def lifespan(self):
         return self._lifespan
 
+    @property
+    def center(self):
+        return (self.x, self.y)
+
     def collide(self, other_object):
         sum_radii = self.radius + other_object.radius
-        other_pos = (other_object.x, other_object.y)
-        if dist((self.x,self.y), other_pos) < sum_radii:
+        other_pos = other_object.center
+        print dist(self.center, other_pos)
+        print sum_radii
+        if dist(self.center, other_pos) < sum_radii:
             return True
         else: 
             return False
@@ -100,7 +106,7 @@ class PlayerSprite(MovingSprite):
                  batch=None,
                  missile_batch=None):
 
-        super(PlayerSprite, self).__init__(image_grid[0], x, y, x_vel, y_vel, batch=batch)
+        super(PlayerSprite, self).__init__(image_grid[0], x, y, x_vel, y_vel, radius=radius, batch=batch)
         self.image_grid = image_grid
         self.x_vel = x_vel
         self.y_vel = y_vel
