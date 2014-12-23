@@ -22,12 +22,13 @@ class Window(pyglet.window.Window):
         self.rocks = pyglet.graphics.Batch()
         self.missiles = pyglet.graphics.Batch()
         self.started = False
+        self.rock_trigger = 0
 
         # Images
         self.background = pyglet.image.load('static/images/nebula_blue.s2014.png')
 
-        rock_img = pyglet.image.load('static/images/asteroid_blue.png')
-        utils.center_image_anchor(rock_img)
+        self.rock_img = pyglet.image.load('static/images/asteroid_blue.png')
+        utils.center_image_anchor(self.rock_img)
 
         ship_sequence = pyglet.image.load('static/images/double_ship.png')
         ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
@@ -35,7 +36,7 @@ class Window(pyglet.window.Window):
 
         # Sounds
         thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
-        explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
+        self.explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
 
         # Sprite Groups
         self.rock_group = set()
@@ -43,12 +44,6 @@ class Window(pyglet.window.Window):
 
         # Spites 
         self.ship = PlayerSprite(ship_imgs, thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
-        # Temporary 
-        rock_position = utils.random_position(WIDTH, HEIGHT)
-        # Temporary
-        self.rock = MovingSprite(rock_img, sound=explosion_snd, diff=self.difficulty, radius=40, batch=self.rocks)
-        # self.rock = MovingSprite(rock_img, 400, 300, 0, 0, 0, batch=self.rocks, radius=40)
-        self.rock_group.add(self.rock)
 
         # Keymaps
         self.key_downs = {key.UP:self.accel, key.LEFT:self.left, key.RIGHT:self.right, key.SPACE:self.fire}
@@ -89,6 +84,18 @@ class Window(pyglet.window.Window):
             if key == symbol:
                 self.key_ups[symbol]()
 
+    def put_rock(self):
+        rock_position = utils.random_position(WIDTH, HEIGHT)
+        rock = MovingSprite (self.rock_img, rock_position[0], rock_position[1],
+                             sound=self.explosion_snd, diff=self.difficulty,
+                             radius=40, batch=self.rocks)
+        self.rock_group.add(rock)
+
+    def trigger_put_rock(self):
+        self.rock_trigger += 1
+        if self.rock_trigger > 60 and len(self.rock_group) < 10:
+            self.put_rock()
+            self.rock_trigger = 0
     # TODO Implement Colisons
     # TODO Implement Sheilds
     # TODO Implement Spontaneos Rock Spawning
@@ -101,6 +108,7 @@ class Window(pyglet.window.Window):
         self.missiles.draw()
 
     def update(self, dt):
+        self.trigger_put_rock()
         for rock in self.rock_group:
             rock.update(WIDTH, HEIGHT) 
         self.ship.update(WIDTH, HEIGHT) 
