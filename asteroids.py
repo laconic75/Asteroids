@@ -45,6 +45,14 @@ class Window(pyglet.window.Window):
         # Spites 
         self.ship = PlayerSprite(ship_imgs, thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
 
+        # Screen Text
+        self.text_lives = pyglet.text.Label('Lives=' + str(self.lives),
+                                            font_name='Times New Roman',
+                                            font_size=36, x=10, y=10)
+        self.text_score = pyglet.text.Label('Score=' + str(self.score),
+                                            font_name='Times New Roman',
+                                            font_size=36, x=10, y=60)
+
         # Keymaps
         self.key_downs = {key.UP:self.accel, key.LEFT:self.left, key.RIGHT:self.right, key.SPACE:self.fire}
         self.key_ups = {key.UP:self.decel, key.LEFT:self.right, key.RIGHT:self.left}
@@ -106,6 +114,8 @@ class Window(pyglet.window.Window):
         self.ships.draw()
         self.rocks.draw()
         self.missiles.draw()
+        self.text_lives.draw()
+        self.text_score.draw()
 
     def update(self, dt):
         self.trigger_put_rock()
