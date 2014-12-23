@@ -72,8 +72,6 @@ class MovingSprite(Sprite):
     def collide(self, other_object):
         sum_radii = self.radius + other_object.radius
         other_pos = other_object.center
-        print dist(self.center, other_pos)
-        print sum_radii
         if dist(self.center, other_pos) < sum_radii:
             return True
         else: 
@@ -115,7 +113,6 @@ class PlayerSprite(MovingSprite):
         self._angle_vel = 0
         self.thruster_snd = pyglet.media.Player()
         self.thruster_snd.queue(sound)
-        self._missiles_fired = set() 
 
         # Sound and images for firing missiles
         self.missile_snd = pyglet.media.load('static/sounds/laser7.wav', streaming=False)
@@ -159,20 +156,18 @@ class PlayerSprite(MovingSprite):
            self.x_vel += x_vel 
            self.y_vel += y_vel
 
-    @property
-    def missiles_fired(self):
-        return self._missiles_fired
-
-    def shoot(self):
+    def shoot(self, missiles_set):
         """
         Shoot missile and make missile sound
+        Callback a Set.add to missile_group in Window class
+        to add new missile to Window
         """
         forward_vector = angle_to_vector(self.rotation)
         ship_nose = [self.x + ((self.height/2)* forward_vector[0]),
                      self.y + ((self.height/2)* forward_vector[1])]
         firing_vel = [self.x_vel + (5*forward_vector[0]), 
                       self.y_vel + (5*forward_vector[1])]
-        self._missiles_fired.add(MovingSprite(self.missile_img, 
+        missiles_set.add(MovingSprite(self.missile_img, 
                                            ship_nose[0], ship_nose[1], 
                                            firing_vel[0], firing_vel[1], 
                                            lifespan=60, batch= self.missile_batch))

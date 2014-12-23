@@ -37,7 +37,7 @@ class Window(pyglet.window.Window):
         thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
         explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
 
-        # Sprinte Groups
+        # Sprite Groups
         self.rock_group = set()
         self.missile_group = set()
 
@@ -77,7 +77,7 @@ class Window(pyglet.window.Window):
         self.ship.angle_vel += 5
     
     def fire(self):
-        self.ship.shoot()
+        self.ship.shoot(self.missile_group)
 
     def on_key_press(self, symbol, modifiers):
         for key in self.key_downs:
@@ -105,10 +105,10 @@ class Window(pyglet.window.Window):
             rock.update(WIDTH, HEIGHT) 
         self.ship.update(WIDTH, HEIGHT) 
 
-        self.local_missiles = set(self.ship.missiles_fired)
-        for missile in self.local_missiles:
+        local_missiles = set(self.missile_group)
+        for missile in local_missiles:
             if not missile.update(WIDTH, HEIGHT):
-                self.ship.missiles_fired.remove(missile)
+                self.missile_group.remove(missile)
                 missile.delete()
 
         if group_collide(self.rock_group, self.ship):

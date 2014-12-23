@@ -5,8 +5,8 @@ import random
 import math
 
 # Helper functions
-def angle_to_vector(ang):
-    rad_ang = math.radians(ang)
+def angle_to_vector(degrees):
+    rad_ang = math.radians(degrees)
     return math.cos(rad_ang), -math.sin(rad_ang)
 
 def dist(p,q):
