@@ -2,7 +2,7 @@
 import pyglet
 import utils
 from pyglet.window import key
-from utils import group_collide
+from utils import group_collide, group_group_collide
 from sprites import MovingSprite, PlayerSprite
 # Global constants
 WIDTH = 800
@@ -66,6 +66,14 @@ class Window(pyglet.window.Window):
         self.score = 0
         # intro screen 
 
+    def display_score(self):
+        self.text_lives = pyglet.text.Label('Lives=' + str(self.lives),
+                                            font_name='Times New Roman',
+                                            font_size=36, x=10, y=10)
+        self.text_score = pyglet.text.Label('Score=' + str(self.score),
+                                            font_name='Times New Roman',
+                                            font_size=36, x=10, y=60)
+
 
     def accel(self):
         self.ship.thrusters = True
@@ -104,9 +112,8 @@ class Window(pyglet.window.Window):
         if self.rock_trigger > 60 and len(self.rock_group) < 10:
             self.put_rock()
             self.rock_trigger = 0
-    # TODO Implement Colisons
+    # TODO Implement Missile-Rock Colisons
     # TODO Implement Sheilds
-    # TODO Implement Spontaneos Rock Spawning
     # TODO Display Spash Screen
     def on_draw(self):
         self.clear()
@@ -130,9 +137,13 @@ class Window(pyglet.window.Window):
                 missile.delete()
 
         if group_collide(self.rock_group, self.ship):
-                    self.lives -= 1
+                self.lives -= 1
 
+        if group_group_collide(self.missile_group, self.rock_group):
+                self.score += 10
+                self.difficulty  += self.score + 50
 
+        self.display_score()
 
 
 def main():
