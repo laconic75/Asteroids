@@ -6,13 +6,6 @@ from utils import angle_to_vector
 from utils import dist
 from pyglet.sprite import Sprite
 
-# #############################################################################
-# TODO                                                                        #
-# We need two Sprite subclasses Moving_Sprite and Player_Sprite               #
-# Moving_Sprite should interit from Sprite and Player_Sprite should inherit   #
-# Moving_Sprite                                                               #
-# #############################################################################
-
 
 class MovingSprite(Sprite):
     def __init__(self, img, 

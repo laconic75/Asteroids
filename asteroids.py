@@ -138,10 +138,12 @@ class Window(pyglet.window.Window):
 
         if group_collide(self.rock_group, self.ship):
                 self.lives -= 1
+                self.explosion_snd.play()
 
         if group_group_collide(self.missile_group, self.rock_group):
                 self.score += 10
                 self.difficulty  += self.score + 50
+                self.explosion_snd.play()
 
         self.display_score()
 
