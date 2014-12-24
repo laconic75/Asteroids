@@ -54,7 +54,7 @@ class Window(pyglet.window.Window):
                                             font_size=36, x=10, y=60)
 
         # Keymaps
-        self.key_downs = {key.UP:self.accel, key.LEFT:self.left, key.RIGHT:self.right, key.SPACE:self.fire}
+        self.key_downs = {key.UP:self.accel, key.LEFT:self.left, key.RIGHT:self.right, key.SPACE:self.fire, key.ESCAPE:pyglet.app.exit}
         self.key_ups = {key.UP:self.decel, key.LEFT:self.right, key.RIGHT:self.left}
 
         pyglet.clock.schedule_interval(self.update, 1/60.0)  # update at 60Hz
