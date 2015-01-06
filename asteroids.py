@@ -33,12 +33,12 @@ class Window(pyglet.window.Window):
         utils.center_image_anchor(self.rock_img)
 
         ship_sequence = pyglet.image.load('static/images/double_ship.png')
-        ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
-        utils.center_image_grid_anchors(ship_imgs)
+        self.ship_imgs = pyglet.image.ImageGrid(ship_sequence, 1, 2)
+        utils.center_image_grid_anchors(self.ship_imgs)
         self.splash_img = pyglet.image.load('static/images/splash.png') 
 
         # Sounds
-        thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
+        self.thruster_snd = pyglet.media.load('static/sounds/rocket.ogg', streaming=False)
         self.explosion_snd = pyglet.media.load('static/sounds/explosion.ogg', streaming=False)
         self.background_music = pyglet.media.load('static/sounds/space1.mp3', streaming=False)
         self.background_music.play()
@@ -48,7 +48,7 @@ class Window(pyglet.window.Window):
         self.missile_group = set()
 
         # Spites 
-        self.ship = PlayerSprite(ship_imgs, thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
+        self.ship = PlayerSprite(self.ship_imgs, self.thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
         self.splash = Sprite(self.splash_img, 200, 125)
 
         # Screen Text
@@ -66,7 +66,8 @@ class Window(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.update, 1/60.0)  # update at 60Hz
     def game_reset(self):
         self.started = False
-        rock_group = set()
+        self.rock_group = set()
+        self.ship = PlayerSprite(self.ship_imgs, self.thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
         # sountrack.pause()
         self.lives = 3
         self.score = 0
@@ -125,9 +126,7 @@ class Window(pyglet.window.Window):
         if self.rock_trigger > 60 and len(self.rock_group) < 10:
             self.put_rock()
             self.rock_trigger = 0
-    # TODO Implement Missile-Rock Colisons
     # TODO Implement Sheilds
-    # TODO Display Spash Screen
     def on_draw(self):
         self.clear()
         self.background.blit(0, 0)

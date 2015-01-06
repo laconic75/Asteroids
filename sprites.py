@@ -117,6 +117,10 @@ class PlayerSprite(MovingSprite):
         """Return tuple of ships position"""
         return self.x, self.y
 
+    @position.setter
+    def position(self, coordinates):
+        self.x, self.y = coordinates
+
     @property
     def thrusters(self):
         """Thrusters on or off"""
