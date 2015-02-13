@@ -68,7 +68,6 @@ class Window(pyglet.window.Window):
         self.started = False
         self.rock_group = set()
         self.ship = PlayerSprite(self.ship_imgs, self.thruster_snd, 400, 250, 0, 0, 270, 35, self.ships, self.missiles)
-        # sountrack.pause()
         self.lives = 3
         self.score = 0
         # intro screen 
